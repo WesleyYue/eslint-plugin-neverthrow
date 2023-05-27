@@ -121,6 +121,16 @@ new TSESLint.RuleTester({
       getNormal()
     `
     ),
+    injectResult(
+      'Handle with isErr()',
+      `
+      const result = getResult();
+
+      if (result.isErr()) {
+        console.log("okay")
+      }
+      `
+    ),
     `// Without definitions
       getNormal()
     `,

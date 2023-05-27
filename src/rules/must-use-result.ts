@@ -25,7 +25,7 @@ const resultProperties = [
   'unwrapOr',
 ];
 
-const handledMethods = ['match', 'unwrapOr', '_unsafeUnwrap'];
+const handledMethods = ['match', 'unwrapOr', '_unsafeUnwrap', 'isErr'];
 
 // evalua dentro de la expresion si es result
 // si es result chequea que sea manejada en el la expresion
@@ -72,7 +72,15 @@ function isHandledResult(node: TSESTree.Node): boolean {
     const methodName = findMemberName(memberExpresion);
     const methodIsCalled = isMemberCalledFn(memberExpresion);
     if (methodName && handledMethods.includes(methodName) && methodIsCalled) {
-      return true;
+      // Check if the method is 'isErr' and the next sibling is an 'IfStatement'
+      if (
+        methodName === 'isErr' &&
+        memberExpresion.parent?.parent?.type === 'IfStatement'
+      ) {
+        return true;
+      } else if (methodName !== 'isErr') {
+        return true;
+      }
     }
     const parent = node.parent?.parent; // search for chain method .map().handler
     if (parent && parent?.type !== 'ExpressionStatement') {
@@ -81,6 +89,7 @@ function isHandledResult(node: TSESTree.Node): boolean {
   }
   return false;
 }
+
 const endTransverse = ['BlockStatement', 'Program'];
 function getAssignation(
   checker: TypeChecker,
